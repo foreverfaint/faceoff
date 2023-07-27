@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "faceoff"
+version = "0.1.0"
+description = ""
+authors = ["dev66 <foreverfaint@gmail.com>"]
+readme = "README.md"
+
+[[tool.poetry.source]]
+name = "default"
+url = "https://pypi.org/simple"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "1.23.5"
+streamlit = "^1.25.0"
+insightface = "^0.7.3"
+onnxruntime = "*"
+streamlit-image-select = "^0.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

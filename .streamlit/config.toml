@@ -1,0 +1,8 @@
+# .streamlit/config.toml
+
+[server]
+enableStaticServing = true
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
