@@ -2,13 +2,15 @@
 
 Build a face swap demo based on [insightface](https://github.com/deepinsight/insightface), [gfpgan](https://github.com/TencentARC/GFPGAN) and [streamlit](https://github.com/streamlit/streamlit).
 
-This demo is tested on Ubuntu 22.04.2 with python 3.10.12
+This demo is tested on Ubuntu 22.04.2 with Python 3.10.12
+
+**DISCLAIMER: all the images in the `static` folder are from Google image search. Those are only used for testing purposes.**
 
 ## 
 
 ## Model Preparation
 
-This demo depends on multiple models
+This demo depends on multiple models.
 
 |Model Name|Description|Location|
 |:-----|:----|:----|
@@ -20,9 +22,9 @@ This demo depends on multiple models
 
 Please:
 
-- Download and save `inswapper_128.onnx` and `GFPGANv1.4.pth` to `./models` folder which is referred in the demo.
+- Download and save the `inswapper_128.onnx` and `GFPGANv1.4.pth` to the `./models` folder, referred to in the demo.
 - `detection_Resnet50_Final.pth` and `parsing_parsenet.pth` will be automatically downloaded to `./gfpgan/weights` folder when you run the demo.
-- `buffalo_l.zip` will be automatically downloaded to `~/.insightface/models` folder when you run the demo.
+- `buffalo_l.zip` will be automatically downloaded to the `~/.insightface/models` folder when you run the demo.
  
 ```bash
 $ mkdir ./models
@@ -36,29 +38,29 @@ $ wget https://github.com/TencentARC/GFPGAN/releases/download/v1.3.4/GFPGANv1.4.
 
 ## Run it locally
 
-We use [pyenv](https://github.com/pyenv/pyenv) + [poetry](https://python-poetry.org/) to create an virtual environment to run the demo. 
+We use [pyenv](https://github.com/pyenv/pyenv) + [poetry](https://python-poetry.org/) to create a virtual environment to run the demo. 
 
 > Assume pyenv and poetry have been installed on your machine.
 
 ```bash
-# Before you use pyenv to install python 3.10, you must ensure some dependences installed on your ubuntu
+# Before you use pyenv to install python 3.10, you must ensure some dependencies are installed on your Ubuntu
 $ sudo apt update && sudo apt install lzma liblzma-dev libbz2-dev
 
-# If you see any warning like 'WARNING: The Python bz2 extension was not compiled. Missing the bzip2 lib?', please apt install the related dependences and try again.
+# If you see any warning like 'WARNING: The Python bz2 extension was not compiled. Missing the bzip2 lib?', please apt install the related dependencies and try again.
 $ pyenv install 3.10
 
-# set your faceoff folder with python 3.10
+# set your faceoff folder with Python 3.10
 $ cd /path/to/faceoff_folder
 $ pyenv local 3.10
 
-# poetry will use python 3.10 to setup your virtual environment
+# poetry will use Python 3.10 to set up your virtual environment
 $ poetry install 
 
 # Start it
 $ poetry run streamlit run app.py
 ```
 
-If you want remove this environment, you should do:
+If you want to remove this environment, you should do:
 
 ```bash
 # Find your env name
@@ -71,7 +73,7 @@ $ poetry env remove faceoff-LR4bX88f-py3.10
 
 ## Run it in Docker
 
-You can also build everything into a docker image and run it everywhere. Before you build the image, you need ensure all the models ready locally because we will copy the models into the image for app launch acceleration. You can see `copy to docker` instruction in `dev.dockerfile` like
+You can also build everything into a docker image and run it everywhere. Before you build the image, you need to ensure all the models are ready locally because we will copy the models into the image for app launch acceleration. You can see `copy to docker` instruction in `Dockerfile` like
 
 ```dockerfile
 COPY ./models/buffalo_l /root/.insightface/models/buffalo_l
