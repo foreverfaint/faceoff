@@ -40,9 +40,17 @@ RUN poetry --version && poetry install -vvv
 
 COPY ./.streamlit ./.streamlit
 COPY ./static ./static
-COPY ./models /root/.insightface/models
-COPY ./gfpgan /workdir/gfpgan
+COPY ./models/buffalo_l /root/.insightface/models/buffalo_l
+
+RUN mkdir ./models
+COPY ./models/*.pth ./models
+COPY ./models/*.onnx ./models
+
+RUN mkdir ./gfpgan
+COPY ./gfpgan ./gfpgan
+
 COPY ./app.py ./
 RUN mkdir /workdir/.output
 
-ENTRYPOINT ["poetry", "run", "streamlit", "run", "app.py"]
+ENTRYPOINT ["poetry", "run"]
+CMD ["streamlit", "run", "app.py"]

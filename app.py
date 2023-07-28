@@ -28,7 +28,7 @@ def get_face_analyser():
 def get_face_swapper():
     # st.info("Start to load face swapper model.")
     # t_1 = time.time()
-    model_path = str(Path("/root/.insightface/models/inswapper_128.onnx"))
+    model_path = "./models/inswapper_128.onnx"
     fs = insightface.model_zoo.get_model(model_path, providers=["CPUExecutionProvider"])
     # t_2 = time.time()
     # cost = round(t_2 - t_1, 2)
@@ -38,7 +38,7 @@ def get_face_swapper():
 
 @st.cache_resource
 def get_face_enhancer():
-    model_path = str(Path("/root/.insightface/models/GFPGANv1.4.pth"))
+    model_path = "./models/GFPGANv1.4.pth"
     # todo: set models path -> https://github.com/TencentARC/GFPGAN/issues/399
     return GFPGANer(
         model_path=model_path,
@@ -300,14 +300,22 @@ def render_stage_2():
     st.radio(
         "Enhancement Mode",
         ("disable_enhance", "enhance_image", "enhance_face"),
-        format_func=lambda x: "Disable Enhance (fast, low quality)" if x == "disable_enhance" else ("Enhance the whole image (very slow, high quality)" if x == "enhance_image" else "Enhance face by face"),
+        format_func=lambda x: "Disable Enhance (fast, low quality)"
+        if x == "disable_enhance"
+        else (
+            "Enhance the whole image (very slow, high quality)"
+            if x == "enhance_image"
+            else "Enhance face by face"
+        ),
         index=1,
         key="enhance_mode",
     )
     st.radio(
         "How to handle multiple faces in the template",
         ("largest", "top3", "all"),
-        format_func=lambda x: "The largest face (fast)" if x == "largest" else ("The first 3 faces" if x == "top3" else "All the faces (slow)"),
+        format_func=lambda x: "The largest face (fast)"
+        if x == "largest"
+        else ("The first 3 faces" if x == "top3" else "All the faces (slow)"),
         index=0,
         key="multi_faces",
     )
@@ -339,8 +347,6 @@ def compose_rgb_img(
     enhance_mode,
     multi_faces,
 ):
-    print(f"multi_faces={multi_faces}, enhance_mode={enhance_mode}")
-
     fe = get_face_enhancer()
     selected_face_in_portrait = _choose_largest_face(faces_in_portrait)
 
@@ -359,17 +365,30 @@ def compose_rgb_img(
             paste_back=True,
         )
 
-    if enhance_mode == "enhance_face":
-        fe = get_face_enhancer()
-        for face in swapped_faces:
-            box = face.bbox.astype(int)
-            x1, y1, x2, y2 = box
-            _, _, enhanced_face = fe.enhance(bgr_res[y1:y2, x1:x2], paste_back=True)
-            if enhanced_face is not None:
-                bgr_res[y1:y2, x1:x2] = enhanced_face
-    elif enhance_mode == "enhance_image":
-        fe = get_face_enhancer()
-        _, _, bgr_res = fe.enhance(bgr_res, paste_back=True)
+    # face enhance isn't stable, it may raise
+    #   File "/root/.cache/pypoetry/virtualenvs/faceoff-L2WRRFYm-py3.10/lib/python3.10/site-packages/gfpgan/utils.py", line 145, in enhance
+    #    restored_img = self.face_helper.paste_faces_to_input_image(upsample_img=bg_img)
+    #  File "/root/.cache/pypoetry/virtualenvs/faceoff-L2WRRFYm-py3.10/lib/python3.10/site-packages/facexlib/utils/face_restoration_helper.py", line 291, in paste_faces_to_input_image
+    #    assert len(self.restored_faces) == len(
+    # AssertionError: length of restored_faces and affine_matrices are different.
+    #  Stopping...
+    #
+    try:
+        if enhance_mode == "enhance_face":
+            fe = get_face_enhancer()
+            for face in swapped_faces:
+                box = face.bbox.astype(int)
+                x1, y1, x2, y2 = box
+                _, _, enhanced_face = fe.enhance(bgr_res[y1:y2, x1:x2], paste_back=True)
+                if enhanced_face is not None:
+                    bgr_res[y1:y2, x1:x2] = enhanced_face
+        elif enhance_mode == "enhance_image":
+            fe = get_face_enhancer()
+            _, _, bgr_res = fe.enhance(bgr_res, paste_back=True)
+    except Exception as e:
+        import traceback
+
+        traceback.print_tb(e.__traceback__)
 
     return _bgr_to_rgb(bgr_res)
 
@@ -385,6 +404,10 @@ def compose_faces():
     selected_template_img_url = st.session_state.get("selected_template_img_url")
     selected_template_bgr_img = get_selected_bgr_image(selected_template_img_url)
     faces_in_template = get_faces(selected_template_bgr_img)
+
+    print(
+        f"portrait_img_url={selected_portrait_img_url}, template_img_url={selected_template_img_url}, multi_faces={multi_faces}, enhance_mode={enhance_mode}"
+    )
 
     placeholder = st.empty()
     with placeholder.container():
