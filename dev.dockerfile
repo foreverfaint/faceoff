@@ -41,6 +41,7 @@ RUN poetry --version && poetry install -vvv
 COPY ./.streamlit ./.streamlit
 COPY ./static ./static
 COPY ./models /root/.insightface/models
+COPY ./gfpgan /workdir/gfpgan
 RUN mkdir /workdir/.output
 
 ENTRYPOINT ["poetry", "run"]

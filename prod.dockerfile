@@ -40,8 +40,9 @@ RUN poetry --version && poetry install -vvv
 
 COPY ./.streamlit ./.streamlit
 COPY ./static ./static
-COPY ./app.py ./
 COPY ./models /root/.insightface/models
+COPY ./gfpgan /workdir/gfpgan
+COPY ./app.py ./
 RUN mkdir /workdir/.output
 
 ENTRYPOINT ["poetry", "run", "streamlit", "run", "app.py"]
